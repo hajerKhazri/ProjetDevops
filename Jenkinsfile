@@ -10,7 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Pull the code from Git
-                git branch: 'EmnaKhelifi', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                git branch: 'emna', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
 
