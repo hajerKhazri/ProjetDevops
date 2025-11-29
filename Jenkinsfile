@@ -29,10 +29,17 @@ pipeline {
             }
         }
 
-       stage('SonarQube Analysis') {
-           steps {
-               sh 'mvn sonar:sonar -Dsonar.projectKey=student-management -Dsonar.host.url=http://192.168.220.128:9000'
-           }
-       }
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo '🎉 PIPELINE DEVOPS COMPLÈTE TERMINÉE!'
+            echo '✅ Build → Test → Package → Docker → SonarQube'
+        }
     }
 }
