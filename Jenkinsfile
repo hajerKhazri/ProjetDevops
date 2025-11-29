@@ -28,5 +28,11 @@ pipeline {
                 '''
             }
         }
+
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
+            }
+        }
     }
 }
