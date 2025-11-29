@@ -1,16 +1,11 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'M3'
-        jdk 'jdk17'
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'fares',
-                url: 'https://github.com/hajerKinazi/ProjetDevops.git'
+                url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
 
