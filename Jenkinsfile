@@ -31,6 +31,14 @@ pipeline {
             }
         }
 
+         stage('SonarQube Analysis') {
+                    steps {
+                        withSonarQubeEnv('MySonarServer') {
+                            sh 'mvn clean verify sonar:sonar'
+                        }
+                    }
+                }
+
         stage('Archive .jar') {
             steps {
                 // Archive the generated jar
