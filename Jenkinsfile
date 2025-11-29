@@ -2,13 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'fares',
-                url: 'https://github.com/hajerKhazri/ProjetDevops.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn clean compile'
