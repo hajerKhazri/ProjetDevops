@@ -1,9 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        label 'master'
+    }
     stages {
-        stage('Unblock Jenkins') {
+        stage('Test Master') {
             steps {
-                sh 'echo "🚀 JENKINS DÉBLOQUÉ - 5.3GB LIBRES!"'
+                sh 'echo "🚀 BUILD SUR MASTER!"'
                 sh 'mvn --version'
                 sh 'docker --version'
             }
