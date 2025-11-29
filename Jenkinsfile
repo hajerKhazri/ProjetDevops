@@ -19,11 +19,14 @@ pipeline {
                 sh 'mvn clean package -DskipTests'
             }
         }
-    }
 
-    post {
-        always {
-            echo 'Pipeline Student-Management completed!'
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    docker build -t student-management:latest .
+                    docker images student-management
+                '''
+            }
         }
     }
 }
