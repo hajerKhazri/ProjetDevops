@@ -29,10 +29,10 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
-            }
-        }
+       stage('SonarQube Analysis') {
+           steps {
+               sh 'mvn sonar:sonar -Dsonar.projectKey=student-management -Dsonar.host.url=http://192.168.220.128:9000'
+           }
+       }
     }
 }
