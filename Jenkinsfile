@@ -24,7 +24,7 @@ pipeline {
                 '''
             }
         }
-        stage('SonarQube Analysis') {
+        stage('SonarQube') {
             steps {
                 sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
             }
@@ -32,7 +32,7 @@ pipeline {
     }
     post {
         always {
-            echo '🎉 PIPELINE DEVOPS COMPLÈTE TERMINÉE! 🎉'
+            echo '🎉 PIPELINE DEVOPS 5/5 TERMINÉE! 🎉'
             echo '✅ Build → Test → Package → Docker → SonarQube'
         }
     }
