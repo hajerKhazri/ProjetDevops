@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'MAVEN_HOME'   // Vérifie que ce nom correspond à Maven dans Jenkins
-        jdk 'JDK-17'         // Vérifie que ce nom correspond au JDK installé
+        maven 'MAVEN_HOME'
+        jdk 'JDK-17'
     }
 
     environment {
@@ -13,11 +13,37 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 echo "=== Récupération du projet depuis GitHub ==="
                 git branch: 'hejer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+            }
+        }
+
+        // AJOUTER CETTE NOUVELLE ÉTAPE
+        stage('Fix Encoding') {
+            steps {
+                echo "=== Correction de l'encodage du fichier application.properties ==="
+                sh '''
+                    # Supprimer le fichier problématique
+                    rm -f src/main/resources/application.properties
+
+                    # Recréer le fichier avec encodage UTF-8
+                    cat > src/main/resources/application.properties << 'EOF'
+spring.application.name=student-management
+spring.datasource.url=jdbc:mysql://localhost:3306/studentdb?createDatabaseIfNotExist=true
+spring.datasource.username=root
+spring.datasource.password=
+spring.jpa.show-sql=true
+spring.jpa.hibernate.ddl-auto=update
+server.port=8089
+server.servlet.context-path=/student
+EOF
+
+                    # Vérifier que le fichier a été créé
+                    ls -la src/main/resources/application.properties
+                    file -i src/main/resources/application.properties
+                '''
             }
         }
 
