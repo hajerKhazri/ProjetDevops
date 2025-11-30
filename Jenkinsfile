@@ -1,13 +1,9 @@
 pipeline {
-    agent {
-        label 'master'
-    }
+    agent any
     stages {
-        stage('Test Master') {
+        stage('Build') {
             steps {
-                sh 'echo "🚀 BUILD SUR MASTER!"'
-                sh 'mvn --version'
-                sh 'docker --version'
+                sh 'mvn clean compile'
             }
         }
     }
