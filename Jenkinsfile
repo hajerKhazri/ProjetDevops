@@ -4,14 +4,13 @@ pipeline {
     tools {
         maven 'MAVEN_HOME'
         jdk 'JDK-17'
-
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                // Récupération du projet depuis GitHub
+                echo "=== Récupération du projet depuis GitHub ==="
                 git branch: 'hejer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
@@ -25,8 +24,9 @@ pipeline {
 
         stage('Tests') {
             steps {
-                echo "=== Exécution des tests ==="
-                sh 'mvn test'
+                echo "=== Exécution des tests avec base H2 ==="
+                // On suppose que tu as configuré un profil 'test' pour utiliser H2
+                sh 'mvn test -Dspring.profiles.active=test'
             }
         }
 
