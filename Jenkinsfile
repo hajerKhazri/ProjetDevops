@@ -26,7 +26,9 @@ pipeline {
         }
         stage('SonarQube') {
             steps {
-                sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=student-management -Dsonar.token=$SONAR_TOKEN'
+                }
             }
         }
     }
