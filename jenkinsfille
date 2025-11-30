@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Récupération du projet depuis GitHub
-                git branch: 'hajer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                git branch: 'hejer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
 
