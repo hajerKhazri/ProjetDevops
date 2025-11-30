@@ -24,5 +24,16 @@ pipeline {
                 '''
             }
         }
+        stage('SonarQube Analysis') {
+            steps {
+                sh 'mvn sonar:sonar -Dsonar.projectKey=student-management'
+            }
+        }
+    }
+    post {
+        always {
+            echo '🎉 PIPELINE DEVOPS COMPLÈTE TERMINÉE! 🎉'
+            echo '✅ Build → Test → Package → Docker → SonarQube'
+        }
     }
 }
