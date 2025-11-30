@@ -25,7 +25,7 @@ pipeline {
         stage('Tests') {
             steps {
                 echo "=== Exécution des tests ==="
-                sh 'mvn test -DskipTests' // skip les tests
+                sh 'mvn test' // exécute réellement les tests
             }
         }
 
