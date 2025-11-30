@@ -8,6 +8,8 @@ pipeline {
 
     environment {
         MAVEN_OPTS = "-Dfile.encoding=UTF-8"
+        LANG = "en_US.UTF-8"
+        LC_ALL = "en_US.UTF-8"
     }
 
     stages {
@@ -22,21 +24,33 @@ pipeline {
         stage('Build') {
             steps {
                 echo "=== Compilation du projet ==="
-                sh 'mvn clean install -DskipTests -Dproject.build.sourceEncoding=UTF-8'
+                sh '''
+                    export LANG=en_US.UTF-8
+                    export LC_ALL=en_US.UTF-8
+                    mvn clean install -DskipTests -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
+                '''
             }
         }
 
         stage('Tests') {
             steps {
                 echo "=== Exécution des tests ==="
-                sh 'mvn test -Dproject.build.sourceEncoding=UTF-8'
+                sh '''
+                    export LANG=en_US.UTF-8
+                    export LC_ALL=en_US.UTF-8
+                    mvn test -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
+                '''
             }
         }
 
         stage('Package') {
             steps {
                 echo "=== Génération du fichier JAR ==="
-                sh 'mvn package -Dproject.build.sourceEncoding=UTF-8'
+                sh '''
+                    export LANG=en_US.UTF-8
+                    export LC_ALL=en_US.UTF-8
+                    mvn package -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
+                '''
             }
         }
 
