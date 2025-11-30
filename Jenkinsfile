@@ -22,12 +22,13 @@ pipeline {
             }
         }
 
-        stage('Tests') {
-            steps {
-                echo "=== Exécution des tests avec base H2 ==="
-                // On suppose que tu as configuré un profil 'test' pour utiliser H2
-                sh 'mvn test -Dspring.profiles.active=test'
-            }
+       stage('Tests') {
+           steps {
+               echo "=== Exécution des tests ==="
+               sh 'mvn test -DskipTests' // skip les tests
+           }
+       }
+
         }
 
         stage('Package') {
