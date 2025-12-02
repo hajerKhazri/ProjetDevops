@@ -1,98 +1,60 @@
 pipeline {
     agent any
-
-    tools {
-        maven 'MAVEN_HOME'
-        jdk 'JDK-17'
-    }
-
-    environment {
-        MAVEN_OPTS = "-Dfile.encoding=UTF-8"
-        LANG = "en_US.UTF-8"
-        LC_ALL = "en_US.UTF-8"
-    }
-
     stages {
-        stage('Checkout') {
+        stage('GitHub') {
             steps {
-                echo "=== Récupération du projet depuis GitHub ==="
-                git branch: 'hejer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                echo '1. Clonage du projet depuis GitHub'
+                git branch: 'hejer',
+                    url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+
+                script {
+                    // Afficher les informations du commit
+                    sh 'git log -1 --oneline'
+                }
             }
         }
-
-        // AJOUTER CETTE NOUVELLE ÉTAPE
-        stage('Fix Encoding') {
-            steps {
-                echo "=== Correction de l'encodage du fichier application.properties ==="
-                sh '''
-                    # Supprimer le fichier problématique
-                    rm -f src/main/resources/application.properties
-
-                    # Recréer le fichier avec encodage UTF-8
-                    cat > src/main/resources/application.properties << 'EOF'
-spring.application.name=student-management
-spring.datasource.url=jdbc:mysql://localhost:3306/studentdb?createDatabaseIfNotExist=true
-spring.datasource.username=root
-spring.datasource.password=
-spring.jpa.show-sql=true
-spring.jpa.hibernate.ddl-auto=update
-server.port=8089
-server.servlet.context-path=/student
-EOF
-
-                    # Vérifier que le fichier a été créé
-                    ls -la src/main/resources/application.properties
-                    file -i src/main/resources/application.properties
-                '''
-            }
-        }
-
         stage('Build') {
             steps {
-                echo "=== Compilation du projet ==="
-                sh '''
-                    export LANG=en_US.UTF-8
-                    export LC_ALL=en_US.UTF-8
-                    mvn clean install -DskipTests -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
-                '''
+                script {
+                    echo "2. Building Spring Boot application..."
+                    sh 'mvn clean compile -DskipTests'
+                }
             }
         }
-
-        stage('Tests') {
+        stage('Test') {
             steps {
-                echo "=== Exécution des tests ==="
-                sh '''
-                    export LANG=en_US.UTF-8
-                    export LC_ALL=en_US.UTF-8
-                    mvn test -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
-                '''
+                script {
+                    echo "Running tests..."
+                    sh 'mvn test'
+                }
             }
         }
-
-        stage('Package') {
+        stage('SonarQube Analysis') {
             steps {
-                echo "=== Génération du fichier JAR ==="
-                sh '''
-                    export LANG=en_US.UTF-8
-                    export LC_ALL=en_US.UTF-8
-                    mvn package -Dproject.build.sourceEncoding=UTF-8 -Dfile.encoding=UTF-8
-                '''
-            }
-        }
-
-        stage('Finish') {
-            steps {
-                echo "=== Pipeline terminé avec succès à ${new Date()} ==="
+                script {
+                    echo 'Analyse de la qualité de code avec SonarQube (configuration fournie)'
+                    // Utilise la configuration demandée. Par sécurité, si une variable d'environnement SONAR_TOKEN est fournie
+                    // dans Jenkins, elle sera utilisée à la place du token statique ci-dessous.
+                    sh """
+                        mvn clean verify sonar:sonar \
+                          -Dsonar.projectKey=Student-Management \
+                          -Dsonar.projectName='Student-Management' \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.token=${env.SONAR_TOKEN ?: 'sqp_d11c08a81174a60c9a107e8a340d7f4f9d7386ef'}
+                    """
+                }
             }
         }
     }
-
     post {
         success {
-            echo "Le build s'est terminé avec succès !"
+            echo 'SUCCÈS : Build et push réussis!'
         }
         failure {
-            echo "Le build a échoué. Vérifie les logs."
+            echo 'ÉCHEC : Build failed!'
+        }
+        always {
+            echo 'Nettoyage...'
         }
     }
 }
