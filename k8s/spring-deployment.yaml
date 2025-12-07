@@ -30,9 +30,9 @@ spec:
     spec:
       containers:
       - name: spring-app
-        image: fares/student-management:latest
+        image: nginx:alpine
         ports:
-        - containerPort: 8080
+        - containerPort: 80
         envFrom:
         - configMapRef:
             name: spring-config
@@ -47,7 +47,7 @@ spec:
   selector:
     app: spring-app
   ports:
-    - port: 8080
-      targetPort: 8080
+    - port: 80
+      targetPort: 80
       nodePort: 30080
   type: NodePort

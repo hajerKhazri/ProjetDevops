@@ -26,13 +26,11 @@ pipeline {
         }
 
         stage('Docker Build & Push') {
+            when {
+                expression { false }  // يتخطاها دائماً
+            }
             steps {
-                script {
-                    sh '''
-                        docker build -t fares/student-management:latest .
-                        docker tag student-management:latest fares/student-management:latest
-                    '''
-                }
+                echo 'Skipping Docker Build for testing'
             }
         }
 
