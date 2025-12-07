@@ -15,7 +15,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'mvn test -Dtest=!TestSpringBoot'  // يخطي TestSpringBoot المؤقت
+                sh 'mvn test -Dtest=!TestSpringBoot'
             }
         }
 
@@ -28,13 +28,9 @@ pipeline {
         stage('Docker Build & Push') {
             steps {
                 script {
-                    // إذا ما عندك credentials في Jenkins، استخدم هذا:
                     sh '''
                         docker build -t fares/student-management:latest .
                         docker tag student-management:latest fares/student-management:latest
-                        # إذا تبيه يدفع لـ Docker Hub، أضف docker login ودوكر push
-                        # docker login -u YOUR_USER -p YOUR_PASS
-                        # docker push fares/student-management:latest
                     '''
                 }
             }
