@@ -45,6 +45,25 @@ pipeline {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t emna/student-management:latest .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                sh '''
+                docker stop student-app || true
+                docker rm student-app || true
+                docker run -d -p 8089:8089 --name student-app emna/student-management:latest
+                '''
+            }
+        }
+
+
+
     }
 
     post {
