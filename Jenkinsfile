@@ -2,14 +2,13 @@ pipeline {
     agent any
 
     tools {
-        // Mettre ici le nom exact de ton installation Maven dans Jenkins
         maven 'Maven3'
         jdk 'JDK17'
     }
 
     environment {
-        // Variables d'environnement si besoin
         DOCKER_IMAGE = 'projetdevops:latest'
+        SONARQUBE = 'SonarQube' // Nom de ton installation SonarQube dans Jenkins
     }
 
     stages {
@@ -21,32 +20,37 @@ pipeline {
 
         stage('Build Maven') {
             steps {
-                // Compilation et tests
                 sh 'mvn clean package -DskipTests=false'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            environment {
+                scannerHome = tool name: "${SONARQUBE}", type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+            }
+            steps {
+                withSonarQubeEnv("${SONARQUBE}") {
+                    sh "mvn sonar:sonar -Dsonar.projectKey=student-management -Dsonar.host.url=http://localhost:9000 -Dsonar.login=<TON_TOKEN>"
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
-                // Construire l'image Docker
                 sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
         stage('Docker Run') {
             steps {
-                // Lancer le conteneur pour test
-                sh "docker run --rm -p 8080:8080 ${DOCKER_IMAGE}"
+                sh 'docker run --rm -p 8081:8080 projetdevops:latest'
+
             }
         }
     }
 
     post {
-        success {
-            echo 'Build terminé avec succès !'
-        }
-        failure {
-            echo 'Le build a échoué ! Vérifie les erreurs.'
-        }
+        success { echo 'Pipeline terminé avec succès !' }
+        failure { echo 'Le pipeline a échoué ! Vérifie les logs.' }
     }
 }
