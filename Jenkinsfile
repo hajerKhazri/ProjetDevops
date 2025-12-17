@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = "emna/student-management"
+        DOCKER_IMAGE = "emnakhelifi/student-management"
         DOCKER_TAG   = "latest"
     }
 
