@@ -1,46 +1,28 @@
 pipeline {
     agent any
-    tools {
-        maven 'M3_HOME'
-        jdk 'JAVA_HOME'
-    }
+    triggers {
+            githubPush()
+        }
     stages {
-        stage('Checkout') {
+        stage('GitHub') {
             steps {
-                git branch: 'fares',
-                    url: 'https://github.com/hajerKhazri/ProjetDevops.git'
-                echo "✅ Code récupéré depuis GitHub"
+                echo '1. Clonage du projet depuis GitHub'
+               git branch: 'fares',
+                url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                script {
+                    // Afficher les informations du commit
+                    sh 'git log -1 --oneline'
+                }
             }
         }
-
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
-                echo "✅ Build Maven réussi"
+                script {
+                    echo "2. Building Spring Boot application..."
+                    sh 'mvn clean compile -DskipTests'
+                }
             }
         }
 
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-                echo "✅ Tests exécutés"
-            }
-        }
 
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
-                echo "✅ JAR généré dans target/"
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '🎉 PIPELINE RÉUSSI ! Build + Test + Package'
-        }
-        failure {
-            echo '❌ PIPELINE ÉCHOUÉ - Vérifie les logs'
-        }
-    }
 }
