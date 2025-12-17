@@ -1,16 +1,22 @@
 pipeline {
     agent any
 
-   tools {
-       maven 'M3'
-       jdk 'JDK17'
-   }
+    tools {
+        maven 'M3'
+        jdk 'JDK17'
+    }
+
+    environment {
+        DOCKER_IMAGE = "emna/student-management"
+        DOCKER_TAG   = "latest"
+    }
 
     stages {
+
         stage('Checkout') {
             steps {
-                // Pull the code from Git
-                git branch: 'emna', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                git branch: 'emna',
+                    url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
 
@@ -31,59 +37,65 @@ pipeline {
             }
         }
 
-         stage('SonarQube Analysis') {
-                    steps {
-                        withSonarQubeEnv('MySonarServer') {
-                            sh 'mvn clean verify sonar:sonar'
-                        }
-                    }
-                }
-
-        stage('Archive .jar') {
+        stage('SonarQube Analysis') {
             steps {
-                // Archive the generated jar
+                withSonarQubeEnv('MySonarServer') {
+                    sh 'mvn clean verify sonar:sonar'
+                }
+            }
+        }
+
+        stage('Archive Artifact') {
+            steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t emna/student-management:latest .'
+                sh '''
+                docker build -t $DOCKER_IMAGE:$DOCKER_TAG .
+                '''
             }
         }
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'docker-hub-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'docker-hub-id',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_TOKEN'
+                    )
+                ]) {
                     sh '''
-                    echo $PASSWORD | docker login -u $USERNAME --password-stdin
-                    docker push emna/student-management:latest
+                    echo "$DOCKER_TOKEN" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $DOCKER_IMAGE:$DOCKER_TAG
                     '''
                 }
             }
         }
-
 
         stage('Docker Run') {
             steps {
                 sh '''
                 docker stop student-app || true
                 docker rm student-app || true
-                docker run -d -p 8089:8089 --name student-app emna/student-management:latest
+                docker run -d \
+                  -p 8089:8089 \
+                  --name student-app \
+                  $DOCKER_IMAGE:$DOCKER_TAG
                 '''
             }
         }
-
-
-
     }
 
     post {
         success {
-            echo 'Pipeline finished successfully!'
+            echo ' Pipeline exécuté avec succès !'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo ' Échec du pipeline'
         }
     }
 }
