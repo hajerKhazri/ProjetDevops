@@ -12,7 +12,14 @@ pipeline {
                 echo '📦 Code récupéré depuis GitHub'
             }
         }
-
+    stage('Test Network') {
+        steps {
+            sh '''
+                echo "Testing connection to Docker Hub..."
+                curl -I --connect-timeout 10 https://hub.docker.com || echo "Network connection failed"
+            '''
+        }
+    }
         stage('2. Build Maven') {
             steps {
                 sh 'mvn clean compile'
