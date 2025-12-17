@@ -2,62 +2,51 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven'
+        // Mettre ici le nom exact de ton installation Maven dans Jenkins
+        maven 'Maven3'
         jdk 'JDK17'
     }
 
     environment {
-        SONAR_HOST_URL = 'http://localhost:9000'
-        SONAR_PROJECT_KEY = 'projet-devops'
-        DOCKER_IMAGE = 'projet-devops:1.0'
+        // Variables d'environnement si besoin
+        DOCKER_IMAGE = 'projetdevops:latest'
     }
 
     stages {
-
-        stage('Checkout GitHub') {
+        stage('Checkout') {
             steps {
-                git branch: 'hejer',
-                    url: 'https://github.com/hajerKhazri/ProjetDevops.git'
+                git branch: 'hejer', url: 'https://github.com/hajerKhazri/ProjetDevops.git'
             }
         }
 
-        stage('Build') {
+        stage('Build Maven') {
             steps {
-                sh 'mvn clean compile'
+                // Compilation et tests
+                sh 'mvn clean package -DskipTests=false'
             }
         }
 
-        stage('Test') {
+        stage('Docker Build') {
             steps {
-                sh 'mvn test'
+                // Construire l'image Docker
+                sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Docker Run') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                    mvn clean verify sonar:sonar \
-                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                    -Dsonar.branch.name=hejer
-                    """
-                }
+                // Lancer le conteneur pour test
+                sh "docker run --rm -p 8080:8080 ${DOCKER_IMAGE}"
             }
         }
+    }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
-            }
+    post {
+        success {
+            echo 'Build terminé avec succès !'
         }
-
-        stage('Run Docker Container') {
-            steps {
-                sh '''
-                docker rm -f projet-devops-container || true
-                docker run -d -p 8082:8081 --name projet-devops-container $DOCKER_IMAGE
-                '''
-            }
+        failure {
+            echo 'Le build a échoué ! Vérifie les erreurs.'
         }
     }
 }
