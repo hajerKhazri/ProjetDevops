@@ -41,12 +41,14 @@ pipeline {
             }
         }
 
-        stage('Docker Run') {
-            steps {
-                sh 'docker run --rm -p 8081:8080 projetdevops:latest'
+     stage('Docker Run') {
+         steps {
+             sh 'docker run --rm -p 8081:8080 projetdevops:latest'
+         }
+     }
 
-            }
-        }
+
+
     }
 
     post {
