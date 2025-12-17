@@ -12,14 +12,7 @@ pipeline {
                 echo '📦 Code récupéré depuis GitHub'
             }
         }
-    stage('Test Network') {
-        steps {
-            sh '''
-                echo "Testing connection to Docker Hub..."
-                curl -I --connect-timeout 10 https://hub.docker.com || echo "Network connection failed"
-            '''
-        }
-    }
+
         stage('2. Build Maven') {
             steps {
                 sh 'mvn clean compile'
@@ -41,38 +34,55 @@ pipeline {
             }
         }
 
-        // ÉTAPE DOCKER AJOUTÉE ICI
         stage('5. Docker Build') {
             steps {
                 script {
-                    // 1. Construire l'image Docker
                     sh 'docker build -t student-management:latest .'
-
-                    // 2. Vérifier que l'image a été créée
                     sh 'docker images | grep student-management'
-
-                    // 3. Optionnel : Tagger pour Docker Hub
-                    // sh 'docker tag student-management:latest tonusername/student-management:latest'
-
                     echo '✅ Image Docker créée : student-management:latest'
                 }
             }
         }
 
-        // ÉTAPE FUTURE : Docker Push (vers Docker Hub)
-        stage('6. Docker Push') {
+        // NOUVELLE ÉTAPE : Docker Push vers Docker Hub
+        stage('6. Docker Push to Hub') {
             steps {
-                echo '🚧 Étape Docker Push - à configurer plus tard'
-                // sh 'docker push tonusername/student-management:latest'
-                // echo '✅ Image poussée sur Docker Hub'
+                script {
+                    echo '🚀 Pushing to Docker Hub...'
+
+                    // 1. Tagger avec ton username Docker Hub
+                    sh 'docker tag student-management:latest faresbelga/student-management:latest'
+
+                    // 2. Se connecter à Docker Hub avec TES CREDENTIALS
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-hub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh '''
+                            echo "Connexion à Docker Hub..."
+                            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        '''
+                    }
+
+                    // 3. Pousser l'image
+                    sh 'docker push faresbelga/student-management:latest'
+
+                    // 4. Vérifier
+                    sh 'docker images | grep faresbelga'
+
+                    echo '✅ Image poussée sur Docker Hub: faresbelga/student-management:latest'
+                    echo '📎 Lien: https://hub.docker.com/r/faresbelga/student-management'
+                }
             }
         }
     }
 
     post {
         success {
-            echo '🎉 PIPELINE COMPLET RÉUSSI ! (Build + Test + Package + Docker)'
-            echo 'Image Docker disponible : student-management:latest'
+            echo '🎉 PIPELINE COMPLET RÉUSSI ! (Build + Test + Package + Docker Build + Docker Push)'
+            echo '📦 JAR: target/student-management-0.0.1-SNAPSHOT.jar'
+            echo '🐳 Image Docker: faresbelga/student-management:latest'
         }
         failure {
             echo '❌ PIPELINE ÉCHOUÉ - Vérifie les logs'
