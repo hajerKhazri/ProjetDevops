@@ -52,6 +52,18 @@ pipeline {
             }
         }
 
+        stage('Docker Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-id', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh '''
+                    echo $PASSWORD | docker login -u $USERNAME --password-stdin
+                    docker push emna/student-management:latest
+                    '''
+                }
+            }
+        }
+
+
         stage('Docker Run') {
             steps {
                 sh '''
