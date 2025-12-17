@@ -1,65 +1,51 @@
+# Créer un nouveau Jenkinsfile avec le contenu complet
+@'
 pipeline {
     agent any
-
     tools {
-        maven 'M3_HOME'  // Doit correspondre au nom configuré dans Jenkins
-        jdk 'JAVA_HOME'   // Doit correspondre au nom configuré dans Jenkins
+        maven "M3_HOME"
+        jdk "JAVA_HOME"
     }
-
     stages {
-        // Étape 1 : Récupération du code
-        stage('Checkout') {
+        stage("Checkout") {
             steps {
-                git branch: 'fares',
-                    url: 'https://github.com/hajerKhazri/ProjetDevops.git'
-                echo "Code récupéré depuis la branche 'fares'"
+                git branch: "fares",
+                     url: "https://github.com/hajerKhazri/ProjetDevops.git"
             }
         }
-
-        // Étape 2 : Compilation
-        stage('Build') {
+        stage("Build") {
             steps {
-                sh 'mvn clean compile'
-                echo "Build réussi"
+                sh "mvn clean compile"
             }
         }
-
-        // Étape 3 : Tests
-        stage('Test') {
+        stage("Test") {
             steps {
-                sh 'mvn test'
-                echo "Tests exécutés"
+                sh "mvn test"
             }
             post {
                 always {
-                    junit 'target/surefire-reports/*.xml'
+                    junit "target/surefire-reports/*.xml"
                 }
             }
         }
-
-        // Étape 4 : Packaging
-        stage('Package') {
+        stage("Package") {
             steps {
-                sh 'mvn package -DskipTests'
-                echo "JAR généré"
+                sh "mvn package -DskipTests"
             }
         }
-
-        // Étape 5 : Déploiement (exemple)
-        stage('Deploy') {
+        stage("Docker Build") {
             steps {
-                echo "Déploiement en cours..."
-                // Ajoute ici tes commandes de déploiement
+                sh "docker build -t student-management:latest ."
             }
         }
     }
-
     post {
         success {
-            echo 'Pipeline réussi! 🎉'
+            echo "Pipeline réussi! 🎉"
         }
         failure {
-            echo 'Pipeline échoué! ❌'
+            echo "Pipeline échoué! ❌"
         }
     }
 }
+'@ | Out-File -FilePath Jenkinsfile -Encoding UTF8
